@@ -178,8 +178,19 @@ def ac_start(server, info):
                 return
         create_backup_temp(server, info,None)
 
+def ac_stop(server ,info):
+    global stop
+    global time_counter
+    if stop:
+        stop = False
+        server.say('§7[§9Regular§r/§cBackup§7] §b定时备份已停止')
+        time_counter = None
+    else:
+        server.tell(info.player,'§7[§9Regular§r/§cBackup§7] §b定时备份未开启')
 
 def on_info(server, info):  # 解析控制台信息
+    global maxtime #用于!!rb status查询状态
+
     if not info.is_user:
         if info.content == 'Saved the game':
             global game_saved
@@ -230,3 +241,17 @@ def on_info(server, info):  # 解析控制台信息
         else:
             maxtime = command[1] if len(command) == 2 else '60'
             ac_start(server, info)
+            
+    #!!rb stop
+    elif len(command) == 1 and command[0] == 'stop':
+        print_message(server,info,"检测到!!rb stop")
+        ac_stop(server ,info)
+    
+    #!!rb status 状态查询
+    elif len(command) == 1 and command[0] == 'status':
+        print_message(server,info,"检测到!!rb status")
+        server.tell(info.player ,'§7--------§bRegular Backup§7--------')
+        server.tell(info.player ,'§b定时备份状态：§e{}'.format(stop))
+        if stop:
+            server.tell(info.player ,'§b定时备份间隔：§e{} min'.format(maxtime))
+            server.tell(info.player ,'§b离下次备份还剩: §e{} min'.format(int(int(maxtime)*60 - time_counter)//60))
