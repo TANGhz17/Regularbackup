@@ -176,7 +176,7 @@ def ac_start(server, info):
                 time.sleep(1)
             else:
                 return
-        create_backup_temp(server, info)
+        create_backup_temp(server, info,None)
 
 
 def on_info(server, info):  # 解析控制台信息
