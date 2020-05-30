@@ -5,11 +5,16 @@ import shutil
 import time
 from threading import Lock
 from utils.rtext import *
-
-SlotCount = 1
+#rb本体设置
+SlotCount = 5
 Prefix = '!!rb'
 BackupPath = './rb_temp'
+
+#定时备份设置
 stop = False
+maxtime = 60
+time_counter = None
+
 TurnOffAutoSave = True
 IgnoreSessionLock = True
 WorldNames = [
@@ -75,7 +80,7 @@ def format_slot_info(info_dict=None, slot_number=None):
     return msg
 
 
-def print_message(server, info, msg, tell=True, prefix='[QBM] '):  # 输出信息方法
+def print_message(server, info, msg, tell=True, prefix='[RB] '):  # 输出信息方法
     msg = prefix + msg
     if info.is_player and not tell:
         server.say(msg)
@@ -112,44 +117,49 @@ def create_backup_temp(server, info, comment):
         print_message(server, info, '§a备份§r中...请稍等')
         start_time = time.time()
         touch_backup_folder()
+        print_message(server, info, 'touch folder success')
 
         # remove the last backup
         shutil.rmtree(get_slot_folder(SlotCount))
+        print_message(server, info, 'removed last backup')
 
         # move slot i-1 to slot i
         for i in range(SlotCount, 1, -1):
+            print_message(server,info,str(i))
             os.rename(get_slot_folder(i - 1), get_slot_folder(i))
 
-            # start backup
-            global game_saved, plugin_unloaded
-            game_saved = False
-            if TurnOffAutoSave:
-                server.execute('save-off')
-            server.execute('save-all')
-            while True:
-                time.sleep(0.01)
-                if game_saved:
-                    break
-                if plugin_unloaded:
-                    server.reply(info, '插件重载，§a备份§r中断！')
-                    return
-            slot_path = get_slot_folder(1)
+        # start backup
+        print_message(server, info, 'start to backup')
+        global game_saved, plugin_unloaded
+        game_saved = False
+        if TurnOffAutoSave:
+            server.execute('save-off')
+        server.execute('save-all')
+        while True:
+            time.sleep(0.01)
+            if game_saved:
+                break
+            if plugin_unloaded:
+                server.reply(info, '插件重载，§a备份§r中断！')
+                return
+        slot_path = get_slot_folder(1)
 
-            copy_worlds(ServerPath, slot_path)
-            slot_info = {'time': format_time()}
-            if comment is not None:
-                slot_info['comment'] = comment
-            with open('{}/info.json'.format(slot_path), 'w') as f:
-                json.dump(slot_info, f, indent=4)
-            end_time = time.time()
-            print_message(server, info, '§a备份§r完成，耗时§6{}§r秒'.format(round(end_time - start_time, 1)))
-            print_message(server, info, format_slot_info(info_dict=slot_info))
+        copy_worlds(ServerPath, slot_path)
+        slot_info = {'time': format_time()}
+        if comment is not None:
+            slot_info['comment'] = comment
+        with open('{}/info.json'.format(slot_path), 'w') as f:
+            json.dump(slot_info, f, indent=4)
+        end_time = time.time()
+        print_message(server, info, '§a备份§r完成，耗时§6{}§r秒'.format(round(end_time - start_time, 1)))
+        print_message(server, info, format_slot_info(info_dict=slot_info))
     except Exception as e:
         print_message(server, info, '§a备份§r失败，错误代码{}'.format(e))
     finally:
         creating_backup.release()
         if TurnOffAutoSave:
             server.execute('save-on')
+    
 
 
 # 清理计时 （改秒计时为分计时）
@@ -157,7 +167,6 @@ def ac_start(server, info):
     global stop
     global maxtime
     global time_counter
-    global comment
     stop = True
     server.say('§7[§9Regular§r/§cBackup§7] §c定时备份以 §e{} §b分间隔开始运行'.format(maxtime))
     maxtimei = int(maxtime) * 60
@@ -171,7 +180,7 @@ def ac_start(server, info):
                 time.sleep(1)
             else:
                 return
-        create_backup_temp(server, info, comment)
+        create_backup_temp(server, info)
 
 
 def on_info(server, info):  # 解析控制台信息
@@ -183,7 +192,7 @@ def on_info(server, info):  # 解析控制台信息
 
     # content：如果该消息是玩家的聊天信息，则其值为玩家的聊天内容。否则其值为原始信息除去时间/线程名等前缀信息后的字符串
     command = info.content.split()  # 将content以空格为分隔符(包含\n),分割成command数组
-    if len(command) == 0 or command[0] != Prefix:  # lan()得到字符长度
+    if len(command) == 0 or command[0] != Prefix:  # len()得到字符长度
         return
 
     del command[0]
@@ -200,12 +209,14 @@ def on_info(server, info):  # 解析控制台信息
         print_help_message(server, info)
 
     # !!rb make [<comment>]
-    elif command >= 1 and command[1] == 'make':
+    elif len(command) >= 1 and command[0] == 'make':
+        print_message(server,info,"检测到!!rb make")
         comment = info.content.replace('{} make'.format(Prefix), '', 1).lstrip(' ')
         create_backup_temp(server, info, comment if len(comment) > 0 else None)
 
     # !!rb start [<Regular_time>]
     elif len(command) in [1, 2] and command[0] == 'start':
+        print_message(server,info,"检测到!!rb start")
         if stop:
             server.tell(info.player, '§7[§9Regular§r/§cBackup§7] §c定时备份已在运行，请勿重复开启')
             return
@@ -222,4 +233,4 @@ def on_info(server, info):  # 解析控制台信息
                 return
         else:
             maxtime = command[1] if len(command) == 2 else '60'
-            create_backup_temp(server, info, comment)
+            ac_start(server, info)
