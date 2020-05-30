@@ -117,19 +117,15 @@ def create_backup_temp(server, info, comment):
         print_message(server, info, '§a备份§r中...请稍等')
         start_time = time.time()
         touch_backup_folder()
-        print_message(server, info, 'touch folder success')
 
         # remove the last backup
         shutil.rmtree(get_slot_folder(SlotCount))
-        print_message(server, info, 'removed last backup')
 
         # move slot i-1 to slot i
         for i in range(SlotCount, 1, -1):
-            print_message(server,info,str(i))
             os.rename(get_slot_folder(i - 1), get_slot_folder(i))
 
         # start backup
-        print_message(server, info, 'start to backup')
         global game_saved, plugin_unloaded
         game_saved = False
         if TurnOffAutoSave:
