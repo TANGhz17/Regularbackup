@@ -41,6 +41,8 @@ HelpMessage = '''
 §7{0}§r 显示帮助信息
 §7{0} make §e[<cmt>]§r 测试备份能力
 §7{0} start §e[<cmt>]§r 开始每§e<cmt>§r分钟备份一次并打包存储
+§7{0} status 查看rb的状态
+§7{0} stop 关闭rb
 '''.strip().format(Prefix)
 game_saved = False  # 保存世界的开关
 plugin_unloaded = False
@@ -222,8 +224,11 @@ def zip_folder(dir):
     if not os.path.exists(temp_zipPath):
         os.mkdir(temp_zipPath)
     filename = serverName + str(time.strftime("%Y%m%d-%H%M%S", time.localtime()))
-    pwd=os.getcwd()
-    os.system("{}/plugins/7z.exe a -t7z {} {}/temp1/* -r -mx=5 -m0=LZMA2 -ms=10m -mf=on -mhc=on -mmt=on".format(pwd,pwd+"/"+temp_zipPath+"/"+filename,pwd+"/"+BackupPath))
+    pwd = os.getcwd()
+    os.system("{}/plugins/7z.exe a -t7z {} {}/temp1/* -r -mx=5 -m0=LZMA2 -ms=10m -mf=on -mhc=on -mmt=on".format(pwd,
+                                                                                                                pwd + "/" + temp_zipPath + "/" + filename,
+                                                                                                                pwd + "/" + BackupPath))
+
 
 def on_info(server, info):  # 解析控制台信息
     global maxtime  # 用于!!rb status查询状态
