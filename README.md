@@ -47,4 +47,4 @@ Python version needs to be Python 3.8+ & MCDReforged 0.8.2-alpha.Tested on Windo
 
 * `serverName` Your server name.It's also the prefix of each zip files
 
-* `compression_level` Custom 7zip compression level.The larger the number, the smaller the zipfile and the longer the time. (Default: `5`)
+* `compression_level` Custom 7zip compression level.The larger the number, the smaller the zipfile and the longer the time. (Default: `2`)
