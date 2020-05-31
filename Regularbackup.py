@@ -9,7 +9,7 @@ import json
 import zipfile
 
 # rb本体设置
-SlotCount = 5
+SlotCount = 2
 Prefix = '!!rb'
 BackupPath = './rb_temp'
 
@@ -51,7 +51,7 @@ def copy_worlds(src, dst):  # 用来复制世界文件夹的
 
 
 def get_slot_folder(slot):  # 获取备份临时文件保存位置
-    return '{}/slot{}'.format(BackupPath, slot)
+    return '{}/temp{}'.format(BackupPath, slot)
 
 
 def get_slot_info(slot):
@@ -124,7 +124,7 @@ def create_backup_temp(server, info, comment):
         # remove the last backup
         shutil.rmtree(get_slot_folder(SlotCount))
 
-        # move slot i-1 to slot i
+        # move temp i-1 to temp i
         for i in range(SlotCount, 1, -1):
             os.rename(get_slot_folder(i - 1), get_slot_folder(i))
 
@@ -198,8 +198,12 @@ def rb_stop(server, info):
 
 def zip_folder(dir):
     global BackupPath
+    global temp_zipPath
+    global temp_BackupPath
+    temp_zipPath = BackupPath + "/Backup_file"
+    temp_BackupPath = BackupPath + "/temp1"
     filename = str(time.strftime("%Y%m%d-%H%M%S", time.localtime()))
-    zipf = zipfile.ZipFile("{}/{}.zip".format(BackupPath, filename), 'w')
+    zipf = zipfile.ZipFile("{}/{}.zip".format(temp_zipPath, filename), 'w')
     for root, dirs, files in os.walk(dir):
         for file in files:
             zipf.write(os.path.join(root, file))
