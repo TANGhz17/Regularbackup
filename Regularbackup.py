@@ -7,7 +7,7 @@ from threading import Lock
 from utils.rtext import *
 import json
 import zipfile
-from bypy import ByPy
+# from bypy import ByPy
 
 # rb本体设置
 SlotCount = 2
@@ -20,8 +20,8 @@ stop = False
 maxtime = 60
 time_counter = None
 
-enable_cloud_backup = True
-baidu=ByPy()
+enable_cloud_backup = False
+# baidu=ByPy()
 
 TurnOffAutoSave = True
 IgnoreSessionLock = True
@@ -212,8 +212,8 @@ def zip_folder(dir):
         for file in files:
             zipf.write(os.path.join(root, file),rootpath+file)
     zipf.close()
-    if enable_cloud_backup:
-        baidu.upload("{}/{}.zip".format(BackupPath, filename))
+    # if enable_cloud_backup:
+        # baidu.upload("{}/{}.zip".format(BackupPath, filename))
 
 
 def on_info(server, info):  # 解析控制台信息

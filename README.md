@@ -25,7 +25,7 @@ MCDReforged/
 Python version needs to be Python 3.6+ & MCDReforged 0.8.2-alpha.Tested on Windows 10 18362 x64 + Python 3.7.4 + MCDRegorged 0.9.2-alpha.
 
 ## Required python modules
-* bypy
+* bypy(optional)
 
 The requirements are stored in `requirement.txt`. You can execute `pip install -r requirement.txt` to install all needed modules
 
@@ -53,7 +53,7 @@ The requirements are stored in `requirement.txt`. You can execute `pip install -
 Default: `enable_cloud_backup = False`
 Whether upload the backup to Baidu Netdisk (Need more configuration).
 
-# Configure cloud backup
+# Configure cloud backup (TODO)
 1. edit `Regularbackup.py`, change `enable_cloud_backup = False` into `enable_cloud_backup = True`
 2. execute `python configure.py` and follow the instuction
 3. The plugin will auto upload the new backups to the Baidu Netdisk 
