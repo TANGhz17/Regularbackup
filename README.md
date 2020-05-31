@@ -3,6 +3,8 @@ A regular backup plugin based on [MCDReforged](https://github.com/Fallen-Breath/
 
 [Here](https://github.com/MCDReforged-Plugins/PluginCatalogue) is a MCDR plugin collection repository
 
+[configure.py](https://github.com/TANGhz17/Regularbackup/blob/master/configure.py)和[requirement.txt](https://github.com/TANGhz17/Regularbackup/blob/master/requirement.txt)暂时不能用
+
 ```
 MCDReforged/
 ├─ plugins/
