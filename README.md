@@ -1,6 +1,26 @@
 # Regularbackup
 A regular backup plugin based on [MCDReforged](https://github.com/Fallen-Breath/MCDReforged)
 
+[Here](https://github.com/MCDReforged-Plugins/PluginCatalogue) is a MCDR plugin collection repository
+
+```
+MCDReforged/
+├─ plugins/
+│  ├─ Regularbackup.py
+│  ├─ my_plugin1.py
+│  └─ ...
+│
+├─ rb_temp/
+│  ├─ Backup_file/
+|  |  ├─ time1.zip
+|  |  ├─ time2.zip
+│  |  └─ ...
+│  ├─ temp1/
+│  └─ temp2/
+│
+└─ MCDReforged.py
+```
+
 # Environment
 Python version needs to be Python 3.6+ & MCDReforged 0.8.2-alpha.Tested on Windows 10 18362 x64 + Python 3.7.4 + MCDRegorged 0.9.2-alpha.
 
@@ -40,3 +60,4 @@ Whether upload the backup to Baidu Netdisk (Need more configuration).
 
 ## How to download the backups from Baidu Netdisk?
 Visit [Baidu Netdisk](https://pan.baidu.com) and enter `apps/bypy(我的应用数据/bypy)`, you can find zip files in the directory
+
