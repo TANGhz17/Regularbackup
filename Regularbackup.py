@@ -14,7 +14,8 @@ SlotCount = 2
 Prefix = '!!rb'
 BackupPath = './rb_temp'
 serverName = ""  # 压缩文件的名称前半段，后半段是时间
-compression_level = 5 # 自定义压缩等级 取值范围1~9，数字越大压缩文件越小，压缩时间越长。默认为5
+compression_level = 2 # 自定义压缩等级 取值范围1~9，数字越大压缩文件越小，压缩时间越长。默认为2
+                      # 压缩比2:1, 2级就压成一半大小
 
 # 定时备份设置
 stop = False
