@@ -10,11 +10,12 @@ import json
 # from bypy import ByPy
 
 # rb本体设置
+SizeDisplay = True
 SlotCount = 2
 Prefix = '!!rb'
 BackupPath = './rb_temp'
 serverName = ""  # 压缩文件的名称前半段，后半段是时间
-compression_level = 5 # 自定义压缩等级 取值范围1~9，数字越大压缩文件越小，压缩时间越长。默认为5
+compression_level = 5  # 自定义压缩等级 取值范围1~9，数字越大压缩文件越小，压缩时间越长。默认为5
 
 # 定时备份设置
 stop = False
@@ -31,7 +32,11 @@ WorldNames = [
 ]
 # 0:guest 1:user 2:helper 3:admin
 MinimumPermissionLevel = {
-    'start': 1
+    'make': 1,
+    'start': 3,
+    'status': 1,
+    'stop': 2,
+    'list': 1
 }
 
 ServerPath = './server'
@@ -43,6 +48,7 @@ HelpMessage = '''
 §7{0} make §e[<cmt>]§r 测试备份能力
 §7{0} start §e[<cmt>]§r 开始每§e<cmt>§r分钟备份一次并打包存储
 §7{0} status 查看rb的状态
+§7{0} list 查看备份列表(暂时还不能使用！！！)
 §7{0} stop 关闭rb
 '''.strip().format(Prefix)
 game_saved = False  # 保存世界的开关
@@ -89,6 +95,24 @@ def format_slot_info(info_dict=None, slot_number=None):
         return None
     msg = '日期: {}; 注释: {}'.format(info['time'], info.get('comment', '§7空§r'))
     return msg
+
+
+def rb_list(server, info, size_display=SizeDisplay):
+    global temp_zipPath
+    # temp_zipPath = BackupPath + "/Backup_file"
+    def get_dir_size(dir):
+        size = 0
+        for root, dirs, files in os.walk(dir):
+            size += sum([os.path.getsize(os.path.join(root, name)) for name in files])
+        if size < 2 ** 30:
+            return f'{round(size / 2 ** 20, 2)} MB'
+        else:
+            return f'{round(size / 2 ** 30, 2)} GB'
+
+    # 显示备份列表，即temp_zipPath目录下文件列表 需要用for循环输出
+
+    if size_display:
+        print_message(server, info, '备份总占用空间: §a{}§r'.format(get_dir_size(temp_zipPath)), prefix='')
 
 
 def print_message(server, info, msg, tell=True, prefix='[RB] '):  # 输出信息方法
@@ -227,9 +251,9 @@ def zip_folder(dir):
     filename = serverName + str(time.strftime("%Y%m%d-%H%M%S", time.localtime()))
     pwd = os.getcwd()
     os.system("{}/plugins/7z.exe a -t7z {} {}/temp1/* -r -mx={} -m0=LZMA2 -ms=10m -mf=on -mhc=on -mmt=on".format(pwd,
-                                                                                                                pwd + "/" + temp_zipPath + "/" + filename,
-                                                                                                                pwd + "/" + BackupPath,
-                                                                                                                compression_level))
+                                                                                                                 pwd + "/" + temp_zipPath + "/" + filename,
+                                                                                                                 pwd + "/" + BackupPath,
+                                                                                                                 compression_level))
 
 
 def on_info(server, info):  # 解析控制台信息
@@ -286,11 +310,6 @@ def on_info(server, info):  # 解析控制台信息
             maxtime = command[1] if len(command) == 2 else '60'
             rb_start(server, info)
 
-    # !!rb stop
-    elif len(command) == 1 and command[0] == 'stop':
-        print_message(server, info, "检测到!!rb stop")
-        rb_stop(server, info)
-
     # !!rb status 状态查询
     elif len(command) == 1 and command[0] == 'status':
         print_message(server, info, "检测到!!rb status")
@@ -299,3 +318,13 @@ def on_info(server, info):  # 解析控制台信息
         if stop:
             server.tell(info.player, '§b定时备份间隔：§e{} min'.format(maxtime))
             server.tell(info.player, '§b离下次备份还剩: §e{} min'.format(int(int(maxtime) * 60 - time_counter) // 60))
+
+    # !!rb list
+    elif len(command) == 1 and command[0] == 'list':
+        print_message(server, info, "检测到!!rb list")
+        rb_list(server, info)
+
+    # !!rb stop
+    elif len(command) == 1 and command[0] == 'stop':
+        print_message(server, info, "检测到!!rb stop")
+        rb_stop(server, info)
