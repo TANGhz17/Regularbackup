@@ -6,7 +6,6 @@ import time
 from threading import Lock
 from utils.rtext import *
 import json
-import zipfile
 
 # from bypy import ByPy
 
@@ -202,22 +201,29 @@ def rb_stop(server, info):
         server.tell(info.player, '§7[§9Regular§r/§cBackup§7] §b定时备份未开启')
 
 
+# def zip_folder(dir):
+#     global BackupPath
+#     temp_zipPath = BackupPath + "/Backup_file"
+#     if not os.path.exists(temp_zipPath):
+#         os.mkdir(temp_zipPath)
+#     filename = serverName + str(time.strftime("%Y%m%d-%H%M%S", time.localtime()))
+#     zipf = zipfile.ZipFile("{}/{}.zip".format(temp_zipPath, filename), 'w')
+#     for root, dirs, files in os.walk(dir):
+#         # print(root.replace(BackupPath,""))
+#         rootpath = root.replace(dir, "")
+#         rootpath = rootpath and rootpath + os.sep or ""
+#         for file in files:
+#             zipf.write(os.path.join(root, file), rootpath + file)
+#     zipf.close()
+
 def zip_folder(dir):
     global BackupPath
-    global temp_zipPath
     temp_zipPath = BackupPath + "/Backup_file"
+    if not os.path.exists(temp_zipPath):
+        os.mkdir(temp_zipPath)
     filename = serverName + str(time.strftime("%Y%m%d-%H%M%S", time.localtime()))
-    zipf = zipfile.ZipFile("{}/{}.zip".format(temp_zipPath, filename), 'w')
-    for root, dirs, files in os.walk(dir):
-        # print(root.replace(BackupPath,""))
-        rootpath = root.replace(dir, "")
-        rootpath = rootpath and rootpath + os.sep or ""
-        for file in files:
-            zipf.write(os.path.join(root, file), rootpath + file)
-    zipf.close()
-    # if enable_cloud_backup:
-    # baidu.upload("{}/{}.zip".format(BackupPath, filename))
-
+    pwd=os.getcwd()
+    os.system("{}/plugins/7z.exe a -t7z {} {}/temp1/* -r -mx=5 -m0=LZMA2 -ms=10m -mf=on -mhc=on -mmt=on".format(pwd,pwd+"/"+temp_zipPath+"/"+filename,pwd+"/"+BackupPath))
 
 def on_info(server, info):  # 解析控制台信息
     global maxtime  # 用于!!rb status查询状态
