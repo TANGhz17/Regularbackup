@@ -7,13 +7,14 @@ from threading import Lock
 from utils.rtext import *
 import json
 import zipfile
+
 # from bypy import ByPy
 
 # rb本体设置
 SlotCount = 2
 Prefix = '!!rb'
 BackupPath = './rb_temp'
-serverName="Test Server"
+serverName = ""  # 压缩文件的名称前半段，后半段是时间
 
 # 定时备份设置
 stop = False
@@ -21,7 +22,7 @@ maxtime = 60
 time_counter = None
 
 enable_cloud_backup = False
-# baidu=ByPy()
+# baidu=ByPy() 
 
 TurnOffAutoSave = True
 IgnoreSessionLock = True
@@ -203,17 +204,19 @@ def rb_stop(server, info):
 
 def zip_folder(dir):
     global BackupPath
-    filename = serverName+str(time.strftime("%Y%m%d-%H%M%S", time.localtime()))
-    zipf = zipfile.ZipFile("{}/{}.zip".format(BackupPath, filename), 'w')
+    global temp_zipPath
+    temp_zipPath = BackupPath + "/Backup_file"
+    filename = serverName + str(time.strftime("%Y%m%d-%H%M%S", time.localtime()))
+    zipf = zipfile.ZipFile("{}/{}.zip".format(temp_zipPath, filename), 'w')
     for root, dirs, files in os.walk(dir):
         # print(root.replace(BackupPath,""))
-        rootpath=root.replace(dir,"")
+        rootpath = root.replace(dir, "")
         rootpath = rootpath and rootpath + os.sep or ""
         for file in files:
-            zipf.write(os.path.join(root, file),rootpath+file)
+            zipf.write(os.path.join(root, file), rootpath + file)
     zipf.close()
     # if enable_cloud_backup:
-        # baidu.upload("{}/{}.zip".format(BackupPath, filename))
+    # baidu.upload("{}/{}.zip".format(BackupPath, filename))
 
 
 def on_info(server, info):  # 解析控制台信息
