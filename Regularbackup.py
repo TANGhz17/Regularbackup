@@ -20,7 +20,7 @@ stop = False
 maxtime = 60
 time_counter = None
 
-enable_cloud_backup = True
+enable_cloud_backup = false
 baidu=ByPy()
 
 TurnOffAutoSave = True
