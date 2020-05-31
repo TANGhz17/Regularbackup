@@ -8,12 +8,12 @@ from utils.rtext import *
 import json
 import zipfile
 
-#rb本体设置
+# rb本体设置
 SlotCount = 5
 Prefix = '!!rb'
 BackupPath = './rb_temp'
 
-#定时备份设置
+# 定时备份设置
 stop = False
 maxtime = 60
 time_counter = None
@@ -162,11 +162,10 @@ def create_backup_temp(server, info, comment):
         creating_backup.release()
         if TurnOffAutoSave:
             server.execute('save-on')
-    
 
 
 # 清理计时 （改秒计时为分计时）
-def ac_start(server, info):
+def rb_start(server, info):
     global stop
     global maxtime
     global time_counter
@@ -183,9 +182,10 @@ def ac_start(server, info):
                 time.sleep(1)
             else:
                 return
-        create_backup_temp(server, info,None)
+        create_backup_temp(server, info, None)
 
-def ac_stop(server ,info):
+
+def rb_stop(server, info):
     global stop
     global time_counter
     if stop:
@@ -193,20 +193,21 @@ def ac_stop(server ,info):
         server.say('§7[§9Regular§r/§cBackup§7] §b定时备份已停止')
         time_counter = None
     else:
-        server.tell(info.player,'§7[§9Regular§r/§cBackup§7] §b定时备份未开启')
+        server.tell(info.player, '§7[§9Regular§r/§cBackup§7] §b定时备份未开启')
+
 
 def zip_folder(dir):
     global BackupPath
-    filename=str(time.strftime("%Y%m%d-%H%M%S", time.localtime())) 
-    zipf=zipfile.ZipFile("{}/{}.zip".format(BackupPath,filename),'w')
-    for root,dirs,files in os.walk(dir):
+    filename = str(time.strftime("%Y%m%d-%H%M%S", time.localtime()))
+    zipf = zipfile.ZipFile("{}/{}.zip".format(BackupPath, filename), 'w')
+    for root, dirs, files in os.walk(dir):
         for file in files:
-            zipf.write(os.path.join(root,file))
+            zipf.write(os.path.join(root, file))
     zipf.close()
 
 
 def on_info(server, info):  # 解析控制台信息
-    global maxtime #用于!!rb status查询状态
+    global maxtime  # 用于!!rb status查询状态
 
     if not info.is_user:
         if info.content == 'Saved the game':
@@ -234,13 +235,13 @@ def on_info(server, info):  # 解析控制台信息
 
     # !!rb make [<comment>]
     elif len(command) >= 1 and command[0] == 'make':
-        print_message(server,info,"检测到!!rb make")
+        print_message(server, info, "检测到!!rb make")
         comment = info.content.replace('{} make'.format(Prefix), '', 1).lstrip(' ')
         create_backup_temp(server, info, comment if len(comment) > 0 else None)
 
     # !!rb start [<Regular_time>]
     elif len(command) in [1, 2] and command[0] == 'start':
-        print_message(server,info,"检测到!!rb start")
+        print_message(server, info, "检测到!!rb start")
         if stop:
             server.tell(info.player, '§7[§9Regular§r/§cBackup§7] §c定时备份已在运行，请勿重复开启')
             return
@@ -248,7 +249,7 @@ def on_info(server, info):  # 解析控制台信息
             if command[1].isdigit():
                 if 60 <= int(command[1]) <= 360:
                     maxtime = command[1]
-                    ac_start(server, info)
+                    rb_start(server, info)
                 else:
                     server.tell(info.player, '§7[§9Regular§r/§cBackup§7] §c请输入 §l§e60-360 §r§c之间的整数')
                     return
@@ -257,18 +258,18 @@ def on_info(server, info):  # 解析控制台信息
                 return
         else:
             maxtime = command[1] if len(command) == 2 else '60'
-            ac_start(server, info)
+            rb_start(server, info)
 
-    #!!rb stop
+    # !!rb stop
     elif len(command) == 1 and command[0] == 'stop':
-        print_message(server,info,"检测到!!rb stop")
-        ac_stop(server ,info)
-    
-    #!!rb status 状态查询
+        print_message(server, info, "检测到!!rb stop")
+        rb_stop(server, info)
+
+    # !!rb status 状态查询
     elif len(command) == 1 and command[0] == 'status':
-        print_message(server,info,"检测到!!rb status")
-        server.tell(info.player ,'§7--------§bRegular Backup§7--------')
-        server.tell(info.player ,'§b定时备份状态：§e{}'.format(stop))
+        print_message(server, info, "检测到!!rb status")
+        server.tell(info.player, '§7--------§bRegular Backup§7--------')
+        server.tell(info.player, '§b定时备份状态：§e{}'.format(stop))
         if stop:
-            server.tell(info.player ,'§b定时备份间隔：§e{} min'.format(maxtime))
-            server.tell(info.player ,'§b离下次备份还剩: §e{} min'.format(int(int(maxtime)*60 - time_counter)//60))
+            server.tell(info.player, '§b定时备份间隔：§e{} min'.format(maxtime))
+            server.tell(info.player, '§b离下次备份还剩: §e{} min'.format(int(int(maxtime) * 60 - time_counter) // 60))
