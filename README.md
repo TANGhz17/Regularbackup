@@ -7,6 +7,7 @@ A regular backup plugin based on [MCDReforged](https://github.com/Fallen-Breath/
 MCDReforged/
 ├─ plugins/
 │  ├─ Regularbackup.py
+│  ├─ 7z.exe
 │  ├─ my_plugin1.py
 │  └─ ...
 │
