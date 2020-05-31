@@ -14,6 +14,7 @@ SlotCount = 2
 Prefix = '!!rb'
 BackupPath = './rb_temp'
 serverName = ""  # 压缩文件的名称前半段，后半段是时间
+compression_level = 5 # 自定义压缩等级 取值范围1~9，数字越大压缩文件越小，压缩时间越长。默认为5
 
 # 定时备份设置
 stop = False
@@ -225,9 +226,10 @@ def zip_folder(dir):
         os.mkdir(temp_zipPath)
     filename = serverName + str(time.strftime("%Y%m%d-%H%M%S", time.localtime()))
     pwd = os.getcwd()
-    os.system("{}/plugins/7z.exe a -t7z {} {}/temp1/* -r -mx=5 -m0=LZMA2 -ms=10m -mf=on -mhc=on -mmt=on".format(pwd,
+    os.system("{}/plugins/7z.exe a -t7z {} {}/temp1/* -r -mx={} -m0=LZMA2 -ms=10m -mf=on -mhc=on -mmt=on".format(pwd,
                                                                                                                 pwd + "/" + temp_zipPath + "/" + filename,
-                                                                                                                pwd + "/" + BackupPath))
+                                                                                                                pwd + "/" + BackupPath,
+                                                                                                                compression_level))
 
 
 def on_info(server, info):  # 解析控制台信息
