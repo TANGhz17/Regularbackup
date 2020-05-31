@@ -5,6 +5,9 @@ import shutil
 import time
 from threading import Lock
 from utils.rtext import *
+import json
+import zipfile
+
 #rb本体设置
 SlotCount = 5
 Prefix = '!!rb'
@@ -149,6 +152,10 @@ def create_backup_temp(server, info, comment):
         end_time = time.time()
         print_message(server, info, '§a备份§r完成，耗时§6{}§r秒'.format(round(end_time - start_time, 1)))
         print_message(server, info, format_slot_info(info_dict=slot_info))
+        print_message(server, info, '§a压缩§r中...请稍等')
+        time.sleep(0.5)
+        zip_folder(slot_path)
+        print_message(server, info, '§a压缩§r完成')
     except Exception as e:
         print_message(server, info, '§a备份§r失败，错误代码{}'.format(e))
     finally:
@@ -187,6 +194,16 @@ def ac_stop(server ,info):
         time_counter = None
     else:
         server.tell(info.player,'§7[§9Regular§r/§cBackup§7] §b定时备份未开启')
+
+def zip_folder(dir):
+    global BackupPath
+    filename=str(time.strftime("%Y%m%d-%H%M%S", time.localtime())) 
+    zipf=zipfile.ZipFile("{}/{}.zip".format(BackupPath,filename),'w')
+    for root,dirs,files in os.walk(dir):
+        for file in files:
+            zipf.write(os.path.join(root,file))
+    zipf.close()
+
 
 def on_info(server, info):  # 解析控制台信息
     global maxtime #用于!!rb status查询状态
@@ -241,7 +258,7 @@ def on_info(server, info):  # 解析控制台信息
         else:
             maxtime = command[1] if len(command) == 2 else '60'
             ac_start(server, info)
-            
+
     #!!rb stop
     elif len(command) == 1 and command[0] == 'stop':
         print_message(server,info,"检测到!!rb stop")
