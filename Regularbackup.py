@@ -5,6 +5,7 @@ import shutil
 import time
 from threading import Lock
 from utils.rtext import *
+from datetime import date
 import json
 
 # from bypy import ByPy
@@ -19,6 +20,8 @@ compression_level = 2  # 自定义压缩等级 取值范围1~9，数字越大压
 # 压缩比2:1, 2级就压成一半大小
 
 # 定时备份设置
+daily_delete=1
+weekly_delete=2
 stop = False
 maxtime = 60
 time_counter = None
@@ -38,7 +41,8 @@ MinimumPermissionLevel = {
     'start': 3,
     'status': 1,
     'stop': 2,
-    'list': 1
+    'list': 1,
+    'clean': 3
 }
 
 ServerPath = './server'
@@ -50,7 +54,8 @@ HelpMessage = '''
 §7{0} make §e[<cmt>]§r 测试备份能力
 §7{0} start §e[<cmt>]§r 开始每§e<cmt>§r分钟备份一次并打包存储
 §7{0} status 查看rb的状态
-§7{0} list 查看备份列表(暂时还不能使用！！！)
+§7{0} list §e[<cmt>]§r 查看备份列表
+§7{0} clean 清理备份文件
 §7{0} stop 关闭rb
 '''.strip().format(Prefix)
 game_saved = False  # 保存世界的开关
@@ -239,11 +244,51 @@ def rb_start(server, info):
                     server.say('§7[§9Regular§r/§cBackup§7] §b还有 §e30 §b分钟，定时备份')
                 if maxtimei - time_counter == 300:
                     server.say('§7[§9Regular§r/§cBackup§7] §b还有 §e5 §b分钟，定时备份')
+                    clean_old_backups()
                 time.sleep(1)
             else:
                 return
         create_backup_temp(server, info, None)
 
+
+def clean_old_backups():
+    temp_zipPath = BackupPath + "/Backup_file"
+    times = []
+    ready_to_delete = []
+    files = os.listdir(temp_zipPath)
+    count = len(files)
+    for i in range(0, count, 1):
+        files[i] = temp_zipPath+"/"+files[i]
+        times.append(date.fromtimestamp(os.path.getmtime(files[i])))
+    
+    time_now=date.today()
+    
+    counter = count-1
+    
+    last_weekly_delete = 0
+    while counter >= 0:
+        if (time_now-times[counter]).days >= daily_delete:
+            if times[counter-1] == times[counter]:
+                ready_to_delete.append(files[counter-1])
+                del files[counter-1]
+                del times[counter-1]
+        counter -= 1
+    
+    counter=len(files)-1
+
+    while counter >= 0:
+        if (time_now-times[counter]).days >= weekly_delete :
+            if (times[counter] - times[counter-1]).days <= 6:
+                ready_to_delete.append(files[counter-1])
+                del files[counter-1]
+                del times[counter-1]
+        counter -=1
+
+    for i in range(0,len(ready_to_delete),1):
+        os.remove(ready_to_delete[i])
+            
+
+        
 
 def rb_stop(server, info):
     global stop
@@ -348,3 +393,8 @@ def on_info(server, info):  # 解析控制台信息
     elif len(command) == 1 and command[0] == 'stop':
         print_message(server, info, "检测到!!rb stop")
         rb_stop(server, info)
+
+    # !!rb clean
+    elif len(command) == 1 and command[0] == 'clean':
+        print_message(server, info, "检测到!!rb clean")
+        clean_old_backups()

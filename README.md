@@ -44,9 +44,14 @@ Python version needs to be Python 3.8+ & MCDReforged 0.8.2-alpha.Tested on Windo
 
 `!!rb list <page>` List all backups
 
+`!!rb clean` Clean old backups
+
 # Constant explain
 * Please refer to [QuickbackupM](https://github.com/TISUnion/QuickBackupM) and [MCDR-AutoCleaner](https://github.com/Forgot-Dream/MCDR-AutoCleaner)
 
 * `serverName` Your server name.It's also the prefix of each zip files
 
 * `compression_level` Custom 7zip compression level.The larger the number, the smaller the zipfile and the longer the time. (Default: `2`)
+
+* `daily_delete` & `weekly_delete` Custom how long to clean backups. (Default: `1` & `2`)
+
