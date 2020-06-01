@@ -46,6 +46,14 @@ Python version needs to be Python 3.8+ & MCDReforged 0.8.2-alpha.Tested on Windo
 
 `!!rb clean` Clean old backups
 
+
+# Compatibility
+
+## If you are using Non-Windows OS
+
+* You need to replace 7z.exe with a suitable copy of 7zip depending on your operating system OR set the `enable_compression` to `False` to disable compression feature.
+* You need to set the `enable_auto_clean` to `False` to prevent backup loss.
+
 # Constant explain
 * Please refer to [QuickbackupM](https://github.com/TISUnion/QuickBackupM) and [MCDR-AutoCleaner](https://github.com/Forgot-Dream/MCDR-AutoCleaner)
 
@@ -55,3 +63,6 @@ Python version needs to be Python 3.8+ & MCDReforged 0.8.2-alpha.Tested on Windo
 
 * `daily_delete` & `weekly_delete` Custom how long to clean backups. (Default: `1` & `2`)
 
+* `enable_compression` Whether to turn on compression (Default: `True`)
+
+* `enable_auto_clean` Whether to turn on auto clean backups (Default: `True`)

@@ -16,6 +16,8 @@ SlotCount = 2
 Prefix = '!!rb'
 BackupPath = './rb_temp'
 serverName = ""  # 压缩文件的名称前半段，后半段是时间
+enable_compression = True # 是否开启压缩
+enable_auto_clean = True #是否开启自动清理
 compression_level = 2  # 自定义压缩等级 取值范围1~9，数字越大压缩文件越小，压缩时间越长。默认为2
 # 压缩比2:1, 2级就压成一半大小
 
@@ -217,10 +219,12 @@ def create_backup_temp(server, info, comment):
         end_time = time.time()
         print_message(server, info, '§a备份§r完成，耗时§6{}§r秒'.format(round(end_time - start_time, 1)))
         print_message(server, info, format_slot_info(info_dict=slot_info))
-        print_message(server, info, '§a压缩§r中...请稍等')
-        time.sleep(0.5)
-        zip_folder(slot_path)
-        print_message(server, info, '§a压缩§r完成')
+        if enable_compression:
+            print_message(server, info, '§a压缩§r中...请稍等')
+            time.sleep(0.5)
+
+            zip_folder(slot_path)
+            print_message(server, info, '§a压缩§r完成')
     except Exception as e:
         print_message(server, info, '§a备份§r失败，错误代码{}'.format(e))
     finally:
@@ -244,7 +248,8 @@ def rb_start(server, info):
                     server.say('§7[§9Regular§r/§cBackup§7] §b还有 §e30 §b分钟，定时备份')
                 if maxtimei - time_counter == 300:
                     server.say('§7[§9Regular§r/§cBackup§7] §b还有 §e5 §b分钟，定时备份')
-                    clean_old_backups()
+                    if enable_auto_clean:
+                        clean_old_backups()
                 time.sleep(1)
             else:
                 return
@@ -252,40 +257,38 @@ def rb_start(server, info):
 
 
 def clean_old_backups():
-    temp_zipPath = BackupPath + "/Backup_file"
-    times = []
-    ready_to_delete = []
-    files = os.listdir(temp_zipPath)
+    temp_zipPath = BackupPath + "/Backup_file" # 获得压缩文件路径
+    times = [] # 时间戳数组（与files[]一一对应）
+    ready_to_delete = []  # 待删除文件列表
+    files = os.listdir(temp_zipPath) # 获得文件列表
     count = len(files)
-    for i in range(0, count, 1):
+    for i in range(0, count, 1): # 获得时间戳并存储
         files[i] = temp_zipPath+"/"+files[i]
         times.append(date.fromtimestamp(os.path.getmtime(files[i])))
     
     time_now=date.today()
     
     counter = count-1
-    
-    last_weekly_delete = 0
-    while counter >= 0:
-        if (time_now-times[counter]).days >= daily_delete:
-            if times[counter-1] == times[counter]:
-                ready_to_delete.append(files[counter-1])
+    while counter >= 0: # 倒序遍历文件列表
+        if (time_now-times[counter]).days >= daily_delete: # 大于每天只保留一个备份的指定时间
+            if times[counter-1] == times[counter]: # 且两备份为同一天创建
+                ready_to_delete.append(files[counter-1]) # 删除较老的备份
                 del files[counter-1]
-                del times[counter-1]
+                del times[counter-1] # 从当前文件列表中清除
         counter -= 1
     
     counter=len(files)-1
 
     while counter >= 0:
-        if (time_now-times[counter]).days >= weekly_delete :
-            if (times[counter] - times[counter-1]).days <= 6:
-                ready_to_delete.append(files[counter-1])
+        if (time_now-times[counter]).days >= weekly_delete : # 大于每天只保留一个备份的指定时间
+            if (times[counter] - times[counter-1]).days <= 6: # 且两备份为同一周内创建
+                ready_to_delete.append(files[counter-1]) # 删除较老备份
                 del files[counter-1]
-                del times[counter-1]
+                del times[counter-1]# 从当前文件列表中清除
         counter -=1
 
     for i in range(0,len(ready_to_delete),1):
-        os.remove(ready_to_delete[i])
+        os.remove(ready_to_delete[i]) # 执行删除动作
             
 
         
@@ -395,6 +398,6 @@ def on_info(server, info):  # 解析控制台信息
         rb_stop(server, info)
 
     # !!rb clean
-    elif len(command) == 1 and command[0] == 'clean':
+    elif len(command) == 1 and command[0] == 'clean' and enable_auto_clean:
         print_message(server, info, "检测到!!rb clean")
         clean_old_backups()
