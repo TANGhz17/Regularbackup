@@ -42,6 +42,8 @@ Python version needs to be Python 3.8+ & MCDReforged 0.8.2-alpha.Tested on Windo
 
 `!!rb stop` Stop auto backup
 
+`!!rb list <page>` List all backups
+
 # Constant explain
 * Please refer to [QuickbackupM](https://github.com/TISUnion/QuickBackupM) and [MCDR-AutoCleaner](https://github.com/Forgot-Dream/MCDR-AutoCleaner)
 

@@ -25,6 +25,7 @@ time_counter = None
 
 enable_cloud_backup = False
 # baidu=ByPy() 
+page = 1
 
 TurnOffAutoSave = True
 IgnoreSessionLock = True
@@ -99,9 +100,10 @@ def format_slot_info(info_dict=None, slot_number=None):
 
 
 def rb_list(server, info, size_display=SizeDisplay):
-    global temp_zipPath
-
-    # temp_zipPath = BackupPath + "/Backup_file"
+    global page
+    temp_zipPath = BackupPath + "/Backup_file"
+    files = os.listdir(temp_zipPath)
+    count = len(files)
     def get_dir_size(dir):
         size = 0
         for root, dirs, files in os.walk(dir):
@@ -110,10 +112,34 @@ def rb_list(server, info, size_display=SizeDisplay):
             return f'{round(size / 2 ** 20, 2)} MB'
         else:
             return f'{round(size / 2 ** 30, 2)} GB'
+    def get_file_size(filePath):
+        size = os.path.getsize(filePath)
+        if size < 2 ** 30:
+            return f'{round(size / 2 ** 20, 2)} MB'
+        else:
+            return f'{round(size / 2 ** 30, 2)} GB'
 
     # 显示备份列表，即temp_zipPath目录下文件列表 需要用for循环输出
+    def show_files_size():
+        num = (page-1)*5
+        if num+5 > count:
+            end = count
+        else:
+            end = num + 5
+        for i in range(num, end, 1):
+            print_message(server, info, "第§a{}§r个备份: {} 占用空间: §a{}§r".format(i+1, files[i],get_file_size(temp_zipPath+"/"+files[i])))
 
     if size_display:
+        show_files_size()
+        if count%5==0:
+            max_page=count//5
+        else:
+            max_page=count//5+1
+        if page == max_page:
+            print_message(server, info, "共§a{}§r个备份,当前§a{}§r/§a{}§r页".format(str(count),str(page),str(max_page)), prefix="")
+        else:
+            next_page = page+1
+            print_message(server, info, "共§a{}§r个备份,当前§a{}§r/§a{}§r页,输入§a{} list {}§r跳转到下一页".format(str(count),str(page),str(max_page),Prefix,str(next_page)), prefix="")
         print_message(server, info, '备份总占用空间: §a{}§r'.format(get_dir_size(temp_zipPath)), prefix='')
 
 
@@ -230,21 +256,6 @@ def rb_stop(server, info):
         server.tell(info.player, '§7[§9Regular§r/§cBackup§7] §b定时备份未开启')
 
 
-# def zip_folder(dir):
-#     global BackupPath
-#     temp_zipPath = BackupPath + "/Backup_file"
-#     if not os.path.exists(temp_zipPath):
-#         os.mkdir(temp_zipPath)
-#     filename = serverName + str(time.strftime("%Y%m%d-%H%M%S", time.localtime()))
-#     zipf = zipfile.ZipFile("{}/{}.zip".format(temp_zipPath, filename), 'w')
-#     for root, dirs, files in os.walk(dir):
-#         # print(root.replace(BackupPath,""))
-#         rootpath = root.replace(dir, "")
-#         rootpath = rootpath and rootpath + os.sep or ""
-#         for file in files:
-#             zipf.write(os.path.join(root, file), rootpath + file)
-#     zipf.close()
-
 def zip_folder(dir):
     global BackupPath
     temp_zipPath = BackupPath + "/Backup_file"
@@ -322,9 +333,16 @@ def on_info(server, info):  # 解析控制台信息
             server.tell(info.player, '§b离下次备份还剩: §e{} min'.format(int(int(maxtime) * 60 - time_counter) // 60))
 
     # !!rb list
-    elif len(command) == 1 and command[0] == 'list':
+    elif len(command) >= 1 and command[0] == 'list':
+        global page
         print_message(server, info, "检测到!!rb list")
-        rb_list(server, info)
+        if len(command) == 1:
+            page = 1
+            rb_list(server, info)
+        elif command[1].isdigit():
+            page = int(command[1])
+            rb_list(server,info)
+
 
     # !!rb stop
     elif len(command) == 1 and command[0] == 'stop':
