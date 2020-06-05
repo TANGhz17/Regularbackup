@@ -268,9 +268,10 @@ def clean_old_backups():
     
     time_now=date.today()
     
-    counter = count-1
+    counter = count - 1
     while counter >= 0: # 倒序遍历文件列表
-        if (time_now-times[counter]).days >= daily_delete: # 大于每天只保留一个备份的指定时间
+        if (time_now-times[counter]).days > daily_delete: # 大于每天只保留一个备份的指定时间
+            print(time_now,times[counter])
             if times[counter-1] == times[counter]: # 且两备份为同一天创建
                 ready_to_delete.append(files[counter-1]) # 删除较老的备份
                 del files[counter-1]
@@ -280,14 +281,16 @@ def clean_old_backups():
     counter=len(files)-1
 
     while counter >= 0:
-        if (time_now-times[counter]).days >= weekly_delete : # 大于每天只保留一个备份的指定时间
+        if (time_now-times[counter]).days > weekly_delete : # 大于每天只保留一个备份的指定时间
             if (times[counter] - times[counter-1]).days <= 6: # 且两备份为同一周内创建
                 ready_to_delete.append(files[counter-1]) # 删除较老备份
                 del files[counter-1]
                 del times[counter-1]# 从当前文件列表中清除
         counter -=1
 
+    del ready_to_delete[0]
     for i in range(0,len(ready_to_delete),1):
+        print(i,ready_to_delete[i])
         os.remove(ready_to_delete[i]) # 执行删除动作
             
 
@@ -358,7 +361,7 @@ def on_info(server, info):  # 解析控制台信息
             return
         elif len(command) == 2:
             if command[1].isdigit():
-                if 60 <= int(command[1]) <= 360:
+                if 6 <= int(command[1]) <= 360:
                     maxtime = command[1]
                     rb_start(server, info)
                 else:
