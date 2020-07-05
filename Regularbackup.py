@@ -257,41 +257,44 @@ def rb_start(server, info):
 
 
 def clean_old_backups():
-    temp_zipPath = BackupPath + "/Backup_file" # 获得压缩文件路径
-    times = [] # 时间戳数组（与files[]一一对应）
-    ready_to_delete = []  # 待删除文件列表
-    files = os.listdir(temp_zipPath) # 获得文件列表
-    count = len(files)
-    for i in range(0, count, 1): # 获得时间戳并存储
-        files[i] = temp_zipPath+"/"+files[i]
-        times.append(date.fromtimestamp(os.path.getmtime(files[i])))
-    
-    time_now=date.today()
-    
-    counter = count - 1
-    while counter >= 0: # 倒序遍历文件列表
-        if (time_now-times[counter]).days > daily_delete: # 大于每天只保留一个备份的指定时间
-            print(time_now,times[counter])
-            if times[counter-1] == times[counter]: # 且两备份为同一天创建
-                ready_to_delete.append(files[counter-1]) # 删除较老的备份
-                del files[counter-1]
-                del times[counter-1] # 从当前文件列表中清除
-        counter -= 1
-    
-    counter=len(files)-1
+    try:
+        temp_zipPath = BackupPath + "/Backup_file" # 获得压缩文件路径
+        times = [] # 时间戳数组（与files[]一一对应）
+        ready_to_delete = []  # 待删除文件列表
+        files = os.listdir(temp_zipPath) # 获得文件列表
+        count = len(files)
+        for i in range(0, count, 1): # 获得时间戳并存储
+            files[i] = temp_zipPath+"/"+files[i]
+            times.append(date.fromtimestamp(os.path.getmtime(files[i])))
+        
+        time_now=date.today()
+        
+        counter = count - 1
+        while counter >= 0: # 倒序遍历文件列表
+            if (time_now-times[counter]).days > daily_delete: # 大于每天只保留一个备份的指定时间
+                print(time_now,times[counter])
+                if times[counter-1] == times[counter]: # 且两备份为同一天创建
+                    ready_to_delete.append(files[counter-1]) # 删除较老的备份
+                    del files[counter-1]
+                    del times[counter-1] # 从当前文件列表中清除
+            counter -= 1
+        
+        counter=len(files)-1
 
-    while counter >= 0:
-        if (time_now-times[counter]).days > weekly_delete : # 大于每天只保留一个备份的指定时间
-            if (times[counter] - times[counter-1]).days <= 6: # 且两备份为同一周内创建
-                ready_to_delete.append(files[counter-1]) # 删除较老备份
-                del files[counter-1]
-                del times[counter-1]# 从当前文件列表中清除
-        counter -=1
+        while counter >= 0:
+            if (time_now-times[counter]).days > weekly_delete : # 大于每天只保留一个备份的指定时间
+                if (times[counter] - times[counter-1]).days <= 6: # 且两备份为同一周内创建
+                    ready_to_delete.append(files[counter-1]) # 删除较老备份
+                    del files[counter-1]
+                    del times[counter-1]# 从当前文件列表中清除
+            counter -=1
 
-    del ready_to_delete[0]
-    for i in range(0,len(ready_to_delete),1):
-        print(i,ready_to_delete[i])
-        os.remove(ready_to_delete[i]) # 执行删除动作
+        del ready_to_delete[0]
+        for i in range(0,len(ready_to_delete),1):
+            print(i,ready_to_delete[i])
+            os.remove(ready_to_delete[i]) # 执行删除动作
+    except IndexError:
+        print("No file to delete")
             
 
         
